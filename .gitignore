@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+jspm_packages/
+
+# Build artifacts & binaries
+build/
+dist/
+*.bin
+*.elf
+*.map
+*.merged.bin
+*.partitions_flashed.bin
+*.bootloader_flashed.bin
+*_flashed.bin
+
+# Environment & Sensitive Config Files
+.env
+.env.*
+!.env.example
+rtdb.env
+
+# OS Files & IDEs
+.DS_Store
+.thumbs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Vercel
+.vercel/

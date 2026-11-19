@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jumlah Log & Riwayat Boot - ESP32 RTDB</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* HTML, CSS, dan JS dicampur dalam satu file terpisah khusus log */
+        .log-card {
+            transition: all 0.2s ease;
+        }
+        .log-card:hover {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans antialiased min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <header class="bg-gray-800 border-b border-gray-700 shadow-lg">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-list-alt text-green-400 text-2xl"></i>
+                <h1 class="text-xl font-bold tracking-wider">Halaman Jumlah Log RTDB</h1>
+            </div>
+            <nav class="flex items-center space-x-3 text-sm">
+                <a href="/" class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-200 transition"><i class="fas fa-home mr-1"></i> Dashboard</a>
+                <a href="/calendar" class="px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-200 transition"><i class="fas fa-calendar mr-1"></i> Kalender</a>
+                <a href="/logs" class="px-3 py-1.5 rounded bg-green-600 text-white transition font-semibold"><i class="fas fa-list-alt mr-1"></i> Jumlah Log</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container mx-auto px-6 py-8 flex-grow">
+        <!-- Stats Card for Total Logs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-md flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 text-sm uppercase tracking-wider font-semibold">Total Jumlah Log (Boot Events)</p>
+                    <p id="total-log-count" class="text-4xl font-extrabold text-green-400 mt-2"><%= bootEvents.length %></p>
+                </div>
+                <div class="bg-green-900 bg-opacity-50 p-4 rounded-full text-green-300">
+                    <i class="fas fa-database text-3xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-md flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 text-sm uppercase tracking-wider font-semibold">Pencarian & Filter Log</p>
+                    <div class="mt-2 flex space-x-2">
+                        <input type="text" id="search-input" placeholder="Cari IP, GPS, atau ID..." class="bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-green-500 w-full" onkeyup="filterLogs()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Logs Table Section -->
+        <section class="bg-gray-800 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-900 border-b border-gray-700 flex justify-between items-center">
+                <h2 class="text-base font-semibold text-gray-200 flex items-center">
+                    <i class="fas fa-table text-green-400 mr-2"></i> Daftar Lengkap Log RTDB (/bootEvents)
+                </h2>
+                <span class="text-xs text-gray-400">Total Ditampilkan: <span id="filtered-count"><%= bootEvents.length %></span> log</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-700 text-left text-sm">
+                    <thead class="bg-gray-900 text-gray-400 uppercase tracking-wider text-xs">
+                        <tr>
+                            <th class="px-6 py-3">No</th>
+                            <th class="px-6 py-3">Event Key ID</th>
+                            <th class="px-6 py-3">IP Address</th>
+                            <th class="px-6 py-3">GPS Location</th>
+                            <th class="px-6 py-3">Boot Time (ms)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-tbody" class="divide-y divide-gray-700">
+                        <% if (bootEvents.length === 0) { %>
+                            <tr>
+                                <td colspan="5" class="px-6 py-4 text-center text-gray-400 italic">Belum ada data log yang tercatat di RTDB.</td>
+                            </tr>
+                        <% } else { %>
+                            <% bootEvents.forEach((evt, index) => { %>
+                                <tr class="log-card hover:bg-gray-750 transition">
+                                    <td class="px-6 py-4 font-mono text-gray-400 text-xs"><%= index + 1 %></td>
+                                    <td class="px-6 py-4 font-mono text-green-300 text-xs" title="<%= evt.id %>"><%= evt.id %></td>
+                                    <td class="px-6 py-4 font-mono text-gray-200"><%= evt.ip || 'N/A' %></td>
+                                    <td class="px-6 py-4 font-mono text-gray-300"><%= evt.gps || 'N/A' %></td>
+                                    <td class="px-6 py-4 font-mono text-indigo-300 font-semibold"><%= evt.bootTimeMs || 'N/A' %></td>
+                                </tr>
+                            <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-4 text-center text-xs text-gray-400">
+        <p>ESP32 RTDB Monitor &bull; Halaman Jumlah Log Terpisah</p>
+    </footer>
+
+    <!-- JavaScript & Styling Mixed -->
+    <script>
+        const allLogs = <%- JSON.stringify(bootEvents || []) %>;
+
+        function filterLogs() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = allLogs.filter(evt => {
+                const id = (evt.id || '').toLowerCase();
+                const ip = (evt.ip || '').toLowerCase();
+                const gps = (evt.gps || '').toLowerCase();
+                const boot = String(evt.bootTimeMs || '').toLowerCase();
+                return id.includes(query) || ip.includes(query) || gps.includes(query) || boot.includes(query);
+            });
+
+            document.getElementById('filtered-count').innerText = filtered.length;
+            const tbody = document.getElementById('logs-tbody');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-400 italic">Tidak ada log yang cocok dengan pencarian.</td></tr>';
+            } else {
+                tbody.innerHTML = filtered.map((evt, index) => `
+                    <tr class="log-card hover:bg-gray-750 transition">
+                        <td class="px-6 py-4 font-mono text-gray-400 text-xs">${index + 1}</td>
+                        <td class="px-6 py-4 font-mono text-green-300 text-xs" title="${evt.id}">${evt.id}</td>
+                        <td class="px-6 py-4 font-mono text-gray-200">${evt.ip || 'N/A'}</td>
+                        <td class="px-6 py-4 font-mono text-gray-300">${evt.gps || 'N/A'}</td>
+                        <td class="px-6 py-4 font-mono text-indigo-300 font-semibold">${evt.bootTimeMs || 'N/A'}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+    </script>
+</body>
+</html>
