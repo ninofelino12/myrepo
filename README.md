@@ -1,7 +1,7 @@
 # ESP32 & ESP8266 IoT OTA, OLED Display & Firebase RTDB Monitoring Ecosystem
 
 Repositori ini berisi ekosistem Internet of Things (IoT) lengkap berbasis mikrokontroler **ESP32** dan **ESP8266**, dilengkapi dengan layar **OLED SSD1306**, pembaruan firmware nirkabel (**OTA & Web Server Updater**), serta integrasi **Firebase Realtime Database (RTDB)** dan aplikasi web dashboard monitoring (**Node.js / Express**).
-
+[![Kalender](https://img.shields.io/badge/📅_Buka_Kalender-Klik_Disini-blue)](https://monitor-ai64eh1m7-ninofelinos-projects.vercel.app/calendar)
 ---
 
 ## 📂 Struktur Repositori
